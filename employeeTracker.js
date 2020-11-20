@@ -86,11 +86,25 @@ const viewEmployees = () => {
 // view departments function
 const viewDepartments = () => {
   console.log("View departments here");
+  const query = `SELECT name as department FROM department;`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    const table = cTable.getTable(res);
+    console.log(table);
+    connection.end();
+  });
 };
 
 // view roles function
 const viewRoles = () => {
   console.log("View roles here");
+  const query = `SELECT title FROM role;`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    const table = cTable.getTable(res);
+    console.log(table);
+    connection.end();
+  });
 };
 
 // add employee function
