@@ -1,7 +1,8 @@
 const inquirer = require("inquirer");
-var mysql = require("mysql");
+const mysql = require("mysql");
+const cTable = require("console.table");
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
   host: "localhost",
 
   // Your port; if not 3306
@@ -20,7 +21,7 @@ connection.connect(function (err) {
   console.log("connected as id " + connection.threadId);
 
   manageEmployees();
-  connection.end();
+  //connection.end();
 });
 
 const manageEmployees = () => {
@@ -69,6 +70,17 @@ const manageEmployees = () => {
 // view employees function
 const viewEmployees = () => {
   console.log("View employees here");
+
+  // view employees query -- does not include manager
+  const query = `SELECT employee.id, first_name, last_name, role.title, department.name AS department, role.salary FROM employee
+  INNER JOIN role ON employee.role_id = role.id
+  INNER JOIN department ON role.department_id = department.id;`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    const table = cTable.getTable(res);
+    console.log(table);
+    connection.end();
+  });
 };
 
 // view departments function
@@ -84,6 +96,32 @@ const viewRoles = () => {
 // add employee function
 const addEmployee = () => {
   console.log("add employees here");
+  inquirer
+    .prompt([
+      {
+        name: "firstName",
+        type: "input",
+        message: "What is the employee's first name?",
+      },
+      {
+        name: "lastName",
+        type: "input",
+        message: "What is the employee's last name?",
+      },
+      {
+        name: "role",
+        type: "list",
+        message: "What is the employee's role?",
+        choices: [
+          // view all roles sql query here
+          "view all roles sql query here",
+        ],
+      },
+    ])
+    .then((answers) => {
+      //sql query to insert employee here
+      console.log(answers);
+    });
 };
 
 // add department function
