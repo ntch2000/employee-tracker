@@ -148,35 +148,12 @@ const viewRoles = () => {
 
 // insert employee to databases function
 
-const insertEmployee = (firstName, lastName, role, manager) => {
+const insertEmployee = (firstName, lastName, role_id, employee_id) => {
   // obtain employee_id for selected manager
-  let employee_id = null;
-  connection.query(
-    `SELECT id FROM employee WHERE first_name = ? AND last_name = ?`,
-    [manager.split(" ")[0], manager.split(" ")[1]],
 
-    (err, res) => {
-      if (err) throw err;
-      console.log("test 1");
-      //console.log(res[0].id);
-      employee_id = res[0].id;
-    }
-  );
-  console.log(employee_id);
+  //console.log(employee_id);
   // obtain the role_id for selected role
-  let role_id;
-  connection.query(
-    `SELECT id FROM role WHERE title = ?`,
-    [role],
 
-    (err, res) => {
-      if (err) throw err;
-      console.log("test 2");
-      //console.log(res[0].id);
-      role_id = res[0].id;
-    }
-  );
-  console.log(role_id);
   // insert new employee into table
 
   console.log("test 3");
@@ -195,8 +172,44 @@ const insertEmployee = (firstName, lastName, role, manager) => {
   );
   manageEmployees();
 };
+
+// get role_id of selected role
+const getRoleId = (role) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      `SELECT id FROM role WHERE title = ?`,
+      [role],
+      (err, res) => {
+        if (err) reject(err);
+        console.log("test 2");
+        //console.log(res[0].id);
+        role_id = res[0].id;
+        //return role_id;
+        resolve(res[0].id);
+      }
+    );
+  });
+};
+
+const getManagerId = (manager) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      `SELECT id FROM employee WHERE concat_ws(" ", first_name, last_name) = ?`,
+      [manager],
+      (err, res) => {
+        if (err) reject(err);
+        console.log("test 2");
+        //console.log(res[0].id);
+        manager_id = res[0].id;
+        //return role_id;
+        resolve(res[0].id);
+      }
+    );
+  });
+};
+
 // add employee function
-const addEmployee = () => {
+const addEmployee = async () => {
   console.log("add employees here");
 
   inquirer
@@ -224,12 +237,15 @@ const addEmployee = () => {
         choices: managerSelection(),
       },
     ])
-    .then((answers) => {
-      console.log("test");
+    .then(async (answers) => {
       //sql query to insert employee here
 
       const { firstName, lastName, role, manager } = answers;
-      insertEmployee(firstName, lastName, role, manager);
+      let role_id = await getRoleId(role);
+      let manager_id = await getManagerId(manager);
+      //console.log(` ${role} = ${role_id}`);
+      //console.log(` ${manager} = ${manager_id}`);
+      insertEmployee(firstName, lastName, role_id, manager_id);
       manageEmployees();
     });
 };
