@@ -98,7 +98,7 @@ const viewDepartments = () => {
     manageEmployees();
   });
 };
-
+// sql queries for inquirer prompts to add employees
 const roleSelection = () => {
   let roles = [];
 
@@ -113,6 +113,8 @@ const roleSelection = () => {
   return roles;
 };
 
+// sql queries for inquirer prompts to add employees
+
 const managerSelection = () => {
   let managers = ["none"];
 
@@ -126,6 +128,7 @@ const managerSelection = () => {
   });
   return managers;
 };
+
 // view roles function
 const viewRoles = () => {
   console.log("View roles here");
@@ -139,6 +142,55 @@ const viewRoles = () => {
   });
 };
 
+// insert employee to databases function
+
+const insertEmployee = (firstName, lastName, role, manager) => {
+  // obtain employee_id for selected manager
+  let employee_id = null;
+  connection.query(
+    `SELECT id FROM employee WHERE first_name = ? AND last_name = ?`,
+    [manager.split(" ")[0], manager.split(" ")[1]],
+
+    (err, res) => {
+      if (err) throw err;
+      console.log("test 1");
+      console.log(res[0].id);
+      employee_id = res[0].id;
+    }
+  );
+
+  // obtain the role_id for selected role
+  let role_id;
+  connection.query(
+    `SELECT id FROM role WHERE title = ?`,
+    [role],
+
+    (err, res) => {
+      if (err) throw err;
+      console.log("test 2");
+      console.log(res[0].id);
+      role_id = res[0].id;
+    }
+  );
+
+  // insert new employee into table
+
+  console.log("test 3");
+  connection.query(
+    `INSERT INTO employee SET ?`,
+    {
+      first_name: firstName,
+      last_name: lastName,
+      role_id: role_id,
+      manager_id: employee_id,
+    },
+    (err) => {
+      if (err) throw err;
+      console.log("Employee added successfully!");
+    }
+  );
+  manageEmployees();
+};
 // add employee function
 const addEmployee = () => {
   console.log("add employees here");
@@ -173,10 +225,6 @@ const addEmployee = () => {
       //sql query to insert employee here
 
       const { firstName, lastName, role, manager } = answers;
-      const managerName = manager.split(" ");
-      console.log(
-        `${firstName} | ${lastName} | ${role} | ${managerName[0]} | ${managerName[1]}`
-      );
       insertEmployee(firstName, lastName, role, manager);
       manageEmployees();
     });
@@ -185,6 +233,25 @@ const addEmployee = () => {
 // add department function
 const addDepartment = () => {
   console.log("add department here");
+  inquirer
+    .prompt({
+      name: "department",
+      message: "What Department would you like to add?",
+      type: "input",
+    })
+    .then(({ department }) => {
+      connection.query(
+        `INSERT INTO department SET ?`,
+        {
+          name: department,
+        },
+        (err) => {
+          if (err) throw err;
+          console.log(`New Department: ${department} was added!`);
+          manageEmployees();
+        }
+      );
+    });
 };
 
 // add role function
