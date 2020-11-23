@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 const cTable = require("console.table");
+//const db = require("./db");
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -69,32 +70,62 @@ const manageEmployees = () => {
 
 // view employees function
 const viewEmployees = () => {
-  console.log("View employees here");
+  //console.log("View employees here");
 
-  // view employees query -- does not include manager
+  //   view employees query -- does not include manager
   const query = `SELECT employee.id, first_name, last_name, role.title, department.name AS department, role.salary FROM employee
-  INNER JOIN role ON employee.role_id = role.id
-  INNER JOIN department ON role.department_id = department.id;`;
+    INNER JOIN role ON employee.role_id = role.id
+    INNER JOIN department ON role.department_id = department.id`;
   connection.query(query, (err, res) => {
     if (err) throw err;
     const table = cTable.getTable(res);
     console.log(table);
-    connection.end();
+    //connection.end();
+    manageEmployees();
   });
 };
 
 // view departments function
 const viewDepartments = () => {
-  console.log("View departments here");
+  // console.log("View departments here");
   const query = `SELECT name as department FROM department;`;
   connection.query(query, (err, res) => {
     if (err) throw err;
     const table = cTable.getTable(res);
+
     console.log(table);
-    connection.end();
+    //connection.end();
+    manageEmployees();
   });
 };
 
+const roleSelection = () => {
+  let roles = [];
+
+  const query = `SELECT title FROM role;`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      roles.push(res[i].title);
+    }
+  });
+  return roles;
+};
+
+const managerSelection = () => {
+  let managers = ["none"];
+
+  const query = `SELECT concat_ws(" ", first_name, last_name) AS manager FROM employee`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      managers.push(res[i].manager);
+    }
+  });
+  return managers;
+};
 // view roles function
 const viewRoles = () => {
   console.log("View roles here");
@@ -103,13 +134,15 @@ const viewRoles = () => {
     if (err) throw err;
     const table = cTable.getTable(res);
     console.log(table);
-    connection.end();
+    manageEmployees();
+    //connection.end();
   });
 };
 
 // add employee function
 const addEmployee = () => {
   console.log("add employees here");
+
   inquirer
     .prompt([
       {
@@ -126,15 +159,26 @@ const addEmployee = () => {
         name: "role",
         type: "list",
         message: "What is the employee's role?",
-        choices: [
-          // view all roles sql query here
-          "view all roles sql query here",
-        ],
+        choices: roleSelection(),
+      },
+      {
+        name: "manager",
+        type: "list",
+        message: "Who is the employee's manager?",
+        choices: managerSelection(),
       },
     ])
     .then((answers) => {
+      console.log("test");
       //sql query to insert employee here
-      console.log(answers);
+
+      const { firstName, lastName, role, manager } = answers;
+      const managerName = manager.split(" ");
+      console.log(
+        `${firstName} | ${lastName} | ${role} | ${managerName[0]} | ${managerName[1]}`
+      );
+      insertEmployee(firstName, lastName, role, manager);
+      manageEmployees();
     });
 };
 
@@ -152,3 +196,5 @@ const addRoles = () => {
 const updateEmployeeRole = () => {
   console.log("update employee role here");
 };
+
+//manageEmployees();
