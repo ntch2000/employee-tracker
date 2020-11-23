@@ -39,6 +39,7 @@ const manageEmployees = () => {
         "Add Department",
         "Add Role",
         "Update Employee Role",
+        "Quit",
       ],
     })
     .then((answer) => {
@@ -63,6 +64,9 @@ const manageEmployees = () => {
           break;
         case "Update Employee Role":
           updateEmployeeRole();
+          break;
+        case "Quit":
+          connection.end();
           break;
       }
     });
@@ -154,11 +158,11 @@ const insertEmployee = (firstName, lastName, role, manager) => {
     (err, res) => {
       if (err) throw err;
       console.log("test 1");
-      console.log(res[0].id);
+      //console.log(res[0].id);
       employee_id = res[0].id;
     }
   );
-
+  console.log(employee_id);
   // obtain the role_id for selected role
   let role_id;
   connection.query(
@@ -168,11 +172,11 @@ const insertEmployee = (firstName, lastName, role, manager) => {
     (err, res) => {
       if (err) throw err;
       console.log("test 2");
-      console.log(res[0].id);
+      //console.log(res[0].id);
       role_id = res[0].id;
     }
   );
-
+  console.log(role_id);
   // insert new employee into table
 
   console.log("test 3");
@@ -254,10 +258,60 @@ const addDepartment = () => {
     });
 };
 
+// view departments to select
+const departmentSelection = () => {
+  let departments = [];
+
+  const query = `SELECT name FROM department;`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      departments.push(res[i].name);
+    }
+  });
+  return departments;
+};
+
 // add role function
 const addRoles = () => {
   console.log("add roles here");
+  inquirer
+    .prompt([
+      {
+        name: "roles",
+        message: "What Role would you like to add?",
+        type: "input",
+      },
+      {
+        name: "salary",
+        message: "What is the salary for this role?",
+        type: "input",
+      },
+      {
+        name: "department",
+        message: "What department does this role belong to?",
+        type: "list",
+        choices: departmentSelection(),
+      },
+    ])
+    .then(({ roles, salary, department }) => {
+      console.log(`${roles} | ${salary} | ${department}`);
+      // connection.query(
+      // `INSERT INTO department SET ?`,
+      // {
+      //   name: department,
+      // },
+      // (err) => {
+      //   if (err) throw err;
+      //   console.log(`New Department: ${department} was added!`);
+      manageEmployees();
+    });
 };
+//         }
+//       );
+//     });
+// };
 
 //update employee roles function
 const updateEmployeeRole = () => {
