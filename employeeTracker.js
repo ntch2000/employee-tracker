@@ -148,15 +148,8 @@ const viewRoles = () => {
 
 // insert employee to databases function
 
-const insertEmployee = (firstName, lastName, role_id, employee_id) => {
-  // obtain employee_id for selected manager
-
-  //console.log(employee_id);
-  // obtain the role_id for selected role
-
-  // insert new employee into table
-
-  console.log("test 3");
+const insertEmployee = (firstName, lastName, role_id, employee_id = null) => {
+  //console.log("test 3");
   connection.query(
     `INSERT INTO employee SET ?`,
     {
@@ -167,10 +160,12 @@ const insertEmployee = (firstName, lastName, role_id, employee_id) => {
     },
     (err) => {
       if (err) throw err;
+      console.log("\n");
       console.log("Employee added successfully!");
+      console.log("\n");
+      viewEmployees();
     }
   );
-  manageEmployees();
 };
 
 // get role_id of selected role
@@ -181,7 +176,7 @@ const getRoleId = (role) => {
       [role],
       (err, res) => {
         if (err) reject(err);
-        console.log("test 2");
+        //console.log("test 2");
         //console.log(res[0].id);
         role_id = res[0].id;
         //return role_id;
@@ -198,7 +193,7 @@ const getManagerId = (manager) => {
       [manager],
       (err, res) => {
         if (err) reject(err);
-        console.log("test 2");
+        //console.log("test 2");
         //console.log(res[0].id);
         manager_id = res[0].id;
         //return role_id;
@@ -210,7 +205,7 @@ const getManagerId = (manager) => {
 
 // add employee function
 const addEmployee = async () => {
-  console.log("add employees here");
+  //console.log("add employees here");
 
   inquirer
     .prompt([
@@ -242,10 +237,13 @@ const addEmployee = async () => {
 
       const { firstName, lastName, role, manager } = answers;
       let role_id = await getRoleId(role);
-      let manager_id = await getManagerId(manager);
-      //console.log(` ${role} = ${role_id}`);
-      //console.log(` ${manager} = ${manager_id}`);
-      insertEmployee(firstName, lastName, role_id, manager_id);
+
+      if (manager === "none") {
+        insertEmployee(firstName, lastName, role_id);
+      } else {
+        let manager_id = await getManagerId(manager);
+        insertEmployee(firstName, lastName, role_id, manager_id);
+      }
       manageEmployees();
     });
 };
