@@ -83,6 +83,7 @@ const viewEmployees = () => {
   connection.query(query, (err, res) => {
     if (err) throw err;
     const table = cTable.getTable(res);
+    console.log("\n");
     console.log(table);
     //connection.end();
     manageEmployees();
@@ -96,7 +97,7 @@ const viewDepartments = () => {
   connection.query(query, (err, res) => {
     if (err) throw err;
     const table = cTable.getTable(res);
-
+    console.log("\n");
     console.log(table);
     //connection.end();
     manageEmployees();
@@ -140,6 +141,7 @@ const viewRoles = () => {
   connection.query(query, (err, res) => {
     if (err) throw err;
     const table = cTable.getTable(res);
+    console.log("\n");
     console.log(table);
     manageEmployees();
     //connection.end();
@@ -162,7 +164,7 @@ const insertEmployee = (firstName, lastName, role_id, employee_id = null) => {
       if (err) throw err;
       console.log("\n");
       console.log("Employee added successfully!");
-      console.log("\n");
+
       viewEmployees();
     }
   );
@@ -244,7 +246,7 @@ const addEmployee = async () => {
         let manager_id = await getManagerId(manager);
         insertEmployee(firstName, lastName, role_id, manager_id);
       }
-      manageEmployees();
+      //manageEmployees();
     });
 };
 
@@ -287,8 +289,25 @@ const departmentSelection = () => {
   return departments;
 };
 
+const getDepartmentId = (department) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      `SELECT id FROM department WHERE name = ?`,
+      [department],
+      (err, res) => {
+        if (err) reject(err);
+        //console.log("test 2");
+        //console.log(res[0].id);
+        department_id = res[0].id;
+        //return role_id;
+        resolve(res[0].id);
+      }
+    );
+  });
+};
+
 // add role function
-const addRoles = () => {
+const addRoles = async () => {
   console.log("add roles here");
   inquirer
     .prompt([
@@ -309,23 +328,26 @@ const addRoles = () => {
         choices: departmentSelection(),
       },
     ])
-    .then(({ roles, salary, department }) => {
+    .then(async ({ roles, salary, department }) => {
       console.log(`${roles} | ${salary} | ${department}`);
-      // connection.query(
-      // `INSERT INTO department SET ?`,
-      // {
-      //   name: department,
-      // },
-      // (err) => {
-      //   if (err) throw err;
-      //   console.log(`New Department: ${department} was added!`);
-      manageEmployees();
+
+      let department_id = await getDepartmentId(department);
+      console.log(department_id);
+      connection.query(
+        `INSERT INTO role SET ?`,
+        {
+          title: roles,
+          salary: salary,
+          department_id: department_id,
+        },
+        (err) => {
+          if (err) throw err;
+          console.log(`New Role: ${roles} was added!`);
+          viewRoles();
+        }
+      );
     });
 };
-//         }
-//       );
-//     });
-// };
 
 //update employee roles function
 const updateEmployeeRole = () => {
