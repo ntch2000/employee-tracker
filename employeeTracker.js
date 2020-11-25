@@ -3,6 +3,12 @@ const mysql = require("mysql");
 const cTable = require("console.table");
 //const db = require("./db");
 
+const util = require("util");
+
+// lookup util to promisify callbacks
+//connection.query = util.promisfy(connection.query)
+// const employee = connection.query(query)
+
 const connection = mysql.createConnection({
   host: "localhost",
 
@@ -25,6 +31,8 @@ connection.connect(function (err) {
   //connection.end();
 });
 
+connection.query = util.promisify(connection.query);
+
 const manageEmployees = () => {
   inquirer
     .prompt({
@@ -40,6 +48,7 @@ const manageEmployees = () => {
         "Add Role",
         "Update Employee Role",
         "Quit",
+        "TEST",
       ],
     })
     .then((answer) => {
@@ -67,6 +76,11 @@ const manageEmployees = () => {
           break;
         case "Quit":
           connection.end();
+          break;
+        case "TEST":
+          roleSelection().then((result) => {
+            return result;
+          });
           break;
       }
     });
@@ -104,19 +118,20 @@ const viewDepartments = () => {
   });
 };
 // sql queries for inquirer prompts to add employees
-const roleSelection = () => {
-  let roles = [];
 
-  const query = `SELECT title FROM role;`;
-  connection.query(query, (err, res) => {
-    if (err) throw err;
+// const roleSelection = () => {
+//   let roles = [];
 
-    for (let i = 0; i < res.length; i++) {
-      roles.push(res[i].title);
-    }
-  });
-  return roles;
-};
+//   const query = `SELECT title FROM role;`;
+//   connection.query(query, (err, res) => {
+//     if (err) throw err;
+
+//     for (let i = 0; i < res.length; i++) {
+//       roles.push(res[i].title);
+//     }
+//   });
+//   return roles;
+// };
 
 // sql queries for inquirer prompts to add employees
 
@@ -205,9 +220,21 @@ const getManagerId = (manager) => {
   });
 };
 
+const roleSelection = async () => {
+  const query = `SELECT title FROM role;`;
+
+  const rolesData = await connection.query(query);
+  const roles = [];
+  for (let i = 0; i < rolesData.length; i++) {
+    roles.push(rolesData[i].title);
+  }
+  return roles;
+};
+
 // add employee function
 const addEmployee = async () => {
   //console.log("add employees here");
+  const role = await roleSelection();
 
   inquirer
     .prompt([
@@ -225,7 +252,7 @@ const addEmployee = async () => {
         name: "role",
         type: "list",
         message: "What is the employee's role?",
-        choices: roleSelection(),
+        choices: role,
       },
       {
         name: "manager",
@@ -350,8 +377,56 @@ const addRoles = async () => {
 };
 
 //update employee roles function
-const updateEmployeeRole = () => {
-  console.log("update employee role here");
+const updateEmployeeRole = async () => {
+  //   console.log("update employee role here");
+  const employee = await employeeSelection();
+  const role = await roleSelection();
+  //employeeSelection();
+  inquirer
+    .prompt([
+      {
+        name: "employee",
+        type: "list",
+        message: "Which Employee do you want to change Roles?",
+        choices: employee, //enter choices
+      },
+      {
+        name: "newRole",
+        type: "list",
+        message: "What is the Employee's new Role?",
+        choices: role,
+      },
+    ])
+    .then(({ employee, newRole }) => {
+      console.log(`${employee} | ${newRole}`);
+      console.log("\n");
+      viewEmployees();
+    });
 };
+
+const employeeSelection = async () => {
+  const query = `SELECT concat_ws(" ", first_name, last_name) AS employee FROM employee;`;
+
+  const employeeData = await connection.query(query);
+  const employees = [];
+  for (let i = 0; i < employeeData.length; i++) {
+    employees.push(employeeData[i].employee);
+  }
+  return employees;
+};
+
+// const blah = () => {
+//   const query = `SELECT first_name AS employee FROM employee;`;
+//   connection.query(query, (err, res) => {
+//     if (err) throw err;
+//     let employees = [];
+
+//     for (let i = 0; i < res.length; i++) {
+//       employees.push(res[i].employee);
+//     }
+//     //console.log(employees);
+//     return employees;
+//   });
+// };
 
 //manageEmployees();
