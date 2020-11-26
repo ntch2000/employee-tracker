@@ -1,4 +1,4 @@
-# employee-tracker
+# Employee Tracker
 
 ## Description
 
@@ -21,6 +21,9 @@ So that I can organize and plan my business
 
 ## Application Screenshot
 
+![View All Employees](./Assets/view-all-employees.jpg "View All Employees")
+_screenshot of the view all employees command_
+
 ## Installation
 
 In order to run this application, users must have a MySQL database and implement the schema.sql and seed.sql files. The database schema should look like the below.
@@ -41,7 +44,7 @@ There are a few node.js packages that must also be installed in order for this t
 
 ## Usage
 
-To use this application, the project files can be forked from my GitHub repository at [GitHub](https://github.com/ntch2000/employee-tracker).
+To use this application, the project files can be forked from my GitHub repository at [ntch2000/employee-tracker](https://github.com/ntch2000/employee-tracker).
 
 Once the files are copied over, cd into the project directory and install the dependencies by using the following command.
 
@@ -65,8 +68,9 @@ The application will then prompt the user with the menu of options. The user can
 - Add Role
 - Update Employee Role
 
-A walkthrough video on how to use this application can be found at [Employee Tracker Application]().
+A walkthrough video on how to use this application can be found at [Employee Tracker Application](https://drive.google.com/file/d/16h5vmM7WPHC4JBW2TjfyuqetDqU-joPb/view?usp=sharing).
 
 ## Credits
 
-- Peter Colella Was a great help to me on this project as he helped me understand async/await functions.
+- Peter Colella was a great help to me on this project as he helped me understand async/await functions.
+- Stanley Lewis helped me understand promises to help make my functions to obtain id's work properly.

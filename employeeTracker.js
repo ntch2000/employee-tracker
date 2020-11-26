@@ -297,11 +297,9 @@ const addRoles = async () => {
       },
     ])
     .then(async ({ roles, salary, department }) => {
-      console.log(`${roles} | ${salary} | ${department}`);
-
       // adds the new role into the database
       let department_id = await getDepartmentId(department);
-      console.log(department_id);
+
       connection.query(
         `INSERT INTO role SET ?`,
         {
