@@ -288,6 +288,10 @@ const addRoles = async () => {
         name: "salary",
         message: "What is the salary for this role?",
         type: "input",
+        validate: (value) => {
+          if (value.match(/^\d+$/)) return true;
+          else return "Please enter a valid Salary (numeric).";
+        },
       },
       {
         name: "department",
