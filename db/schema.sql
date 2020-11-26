@@ -33,10 +33,8 @@ first_name VARCHAR(30),
 last_name VARCHAR(30),
 -- set as foreign key references role id
 role_id INT NOT NULL,
--- set as foreign key to another employee that manaages current employee
--- field is null if no manager
+-- set as foreign key to another employee that 
 manager_id INT,
 PRIMARY KEY (id)
 );
 
--- seed file will have all the insert data information
